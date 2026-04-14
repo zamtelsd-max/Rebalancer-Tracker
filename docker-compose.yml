@@ -1,0 +1,56 @@
+version: '3.9'
+
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: zlms-db
+    environment:
+      POSTGRES_DB: zlms
+      POSTGRES_USER: zlms
+      POSTGRES_PASSWORD: zlms_password
+    ports:
+      - '5432:5432'
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U zlms -d zlms']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: zlms-api
+    environment:
+      DATABASE_URL: postgresql://zlms:zlms_password@db:5432/zlms
+      JWT_SECRET: ${JWT_SECRET:-change-me-in-production}
+      PORT: 3001
+      NODE_ENV: production
+      CORS_ORIGIN: http://localhost:5173
+      INTEGRATION_MODE: ${INTEGRATION_MODE:-standalone}
+      WEBHOOK_SECRET: ${WEBHOOK_SECRET:-change-me}
+      API_BASE_URL: ${API_BASE_URL:-http://localhost:3001}
+    ports:
+      - '3001:3001'
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: unless-stopped
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      args:
+        VITE_API_BASE_URL: /api
+    container_name: zlms-frontend
+    ports:
+      - '80:80'
+    depends_on:
+      - backend
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
