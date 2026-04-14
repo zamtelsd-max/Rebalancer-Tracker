@@ -1,0 +1,10 @@
+node_modules/
+dist/
+dist-ghpages/
+.env
+*.local
+.DS_Store
+*.log
+coverage/
+.prisma/
+prisma/migrations/

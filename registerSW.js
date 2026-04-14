@@ -1,0 +1,1 @@
+if('serviceWorker' in navigator) {window.addEventListener('load', () => {navigator.serviceWorker.register('/Rebalancer-Tracker/sw.js', { scope: '/Rebalancer-Tracker/' })})}
