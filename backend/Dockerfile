@@ -1,5 +1,6 @@
 FROM node:20-alpine AS builder
 WORKDIR /app
+# cache-bust: postgresql-2026-04-14
 COPY package*.json ./
 RUN npm ci
 COPY . .
